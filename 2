@@ -11,7 +11,7 @@ while ($true) {
     switch ($choice) {
         "1" {
             # B1: Prepend .log files to DailyLog.txt (newest at the top)
-            $logPath = "C:\source\requirements1\DailyLog.txt"
+            $logPath = "$PSScriptRoot\DailyLog.txt"
             
             # Check if the DailyLog.txt exists. If it doesn't, create it.
             if (!(Test-Path $logPath)) {
@@ -30,7 +30,7 @@ Mode, Last Write Time, Length, Name
 "@
 
             # Append the .log files list
-            $newContent += (Get-ChildItem -Path "C:\source\requirements1" -Filter "*.log" | 
+            $newContent += (Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
                             Select-Object Mode, LastWriteTime, Length, Name | 
                             Format-Table -AutoSize | Out-String)
 
@@ -41,14 +41,14 @@ Mode, Last Write Time, Length, Name
         }
         "2" {
             # B2: List all files in tabular format and save to C916contents.txt
-            $contentsPath = "C:\source\requirements1\C916contents.txt"
+            $contentsPath = "$PSScriptRoot\C916contents.txt"
 
-            if (!(Test-Path "C:\source\requirements1")) {
-                Write-Host "❌ Error: The directory C:\source\requirements1 does not exist."
+            if (!(Test-Path "$PSScriptRoot")) {
+                Write-Host "❌ Error: The directory $PSScriptRoot does not exist."
                 continue
             }
 
-            Get-ChildItem -Path "C:\source\requirements1" | 
+            Get-ChildItem -Path "$PSScriptRoot" | 
                 Sort-Object Name | 
                 Format-Table -AutoSize | 
                 Out-File -FilePath $contentsPath
@@ -57,7 +57,7 @@ Mode, Last Write Time, Length, Name
         }
         "3" {
             # B3: Show CPU and memory usage and log to file (only create file if needed)
-            $usagePath = "C:\source\requirements1\CPU_Memory_Usage.txt"
+            $usagePath = "$PSScriptRoot\CPU_Memory_Usage.txt"
             
             # Check if the CPU_Memory_Usage.txt exists. If not, create it.
             if (!(Test-Path $usagePath)) {
@@ -65,7 +65,8 @@ Mode, Last Write Time, Length, Name
                 New-Item -Path $usagePath -ItemType File
             }
 
-            Read-Host "Press Enter to check system usage..."
+            Write-Host "📊 Collecting CPU and memory usage data..."
+
             $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
             $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 2 -MaxSamples 3
             
