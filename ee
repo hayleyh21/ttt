@@ -26,7 +26,7 @@ while ($true) {
             $newContent = @"
 $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
  ---- ------------- ------ ----
-
+Mode LastWriteTime Length Name
 "@
 
             # Get and append only .log files in the folder
@@ -51,13 +51,13 @@ $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
             Write-Host "✅ File listing saved to C916contents.txt."
         }
         "3" {
-            # B3: Show CPU and memory usage without saving to file
-            Write-Host "📊 Collecting CPU and memory usage data..."
+            # B3: Show CPU and memory usage with 4 samples and 5-second intervals
+            Write-Host "📊 Collecting CPU and memory usage data (4 samples, 5-second interval)..."
 
-            $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
-            $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 2 -MaxSamples 3
+            $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 5 -MaxSamples 4
+            $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 5 -MaxSamples 4
             
-            $results = for ($i = 0; $i -lt 3; $i++) {
+            $results = for ($i = 0; $i -lt 4; $i++) {
                 [PSCustomObject]@{
                     Timestamp    = $cpuUsage.CounterSamples[$i].Timestamp
                     CPU_Usage    = [math]::round($cpuUsage.CounterSamples[$i].CookedValue, 2)
@@ -65,7 +65,7 @@ $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
                 }
             }
 
-            # Display results in the console (without saving to file)
+            # Display results in the console
             $results | Format-Table -AutoSize
             Write-Host "✅ CPU and memory usage displayed in the console."
             Write-Host "Please take a screenshot and save it in Requirements1."
