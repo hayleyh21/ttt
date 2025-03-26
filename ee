@@ -24,7 +24,7 @@ while ($true) {
 $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
 Directory: $PSScriptRoot
  ---- ------------- ------ ----
-Mode LastWriteTime Length Name
+
 "@
 
             # Get and append only .log files in the folder
