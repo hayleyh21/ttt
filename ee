@@ -10,7 +10,7 @@ while ($true) {
     
     switch ($choice) {
         "1" {
-            # B1: Prepend .log files to DailyLog.txt (newest at the top)
+            # B1: Append .log files to DailyLog.txt
             $logPath = "$PSScriptRoot\DailyLog.txt"
             
             # Check if the DailyLog.txt exists. If it doesn't, create it.
@@ -19,18 +19,17 @@ while ($true) {
                 New-Item -Path $logPath -ItemType File
             }
             
-            # Prepare the new content to prepend
+            # Prepare the new content to append
             $newContent = @"
 $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
 Directory: $PSScriptRoot
  ---- ------------- ------ ----
-
 "@
 
             # Get and append only .log files in the folder
             $newContent += (Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
                             Select-Object Mode, LastWriteTime, Length, Name | 
-                            Format-Table -AutoSize | Out-String)
+                            Format-Table -AutoSize)
 
             # Prepend the new content and then append the existing content
             $existingContent = Get-Content -Path $logPath
