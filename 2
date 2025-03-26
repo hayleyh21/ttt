@@ -43,11 +43,6 @@ Mode, Last Write Time, Length, Name
             # B2: List all files in tabular format and save to C916contents.txt
             $contentsPath = "$PSScriptRoot\C916contents.txt"
 
-            if (!(Test-Path "$PSScriptRoot")) {
-                Write-Host "❌ Error: The directory $PSScriptRoot does not exist."
-                continue
-            }
-
             Get-ChildItem -Path "$PSScriptRoot" | 
                 Sort-Object Name | 
                 Format-Table -AutoSize | 
@@ -56,15 +51,10 @@ Mode, Last Write Time, Length, Name
             Write-Host "✅ File listing saved to C916contents.txt."
         }
         "3" {
-            # B3: Show CPU and memory usage and log to file (only create file if needed)
+            # B3: Show CPU and memory usage and log to file
             $usagePath = "$PSScriptRoot\CPU_Memory_Usage.txt"
-            
-            # Check if the CPU_Memory_Usage.txt exists. If not, create it.
-            if (!(Test-Path $usagePath)) {
-                Write-Host "❌ $usagePath does not exist. Creating new file..."
-                New-Item -Path $usagePath -ItemType File
-            }
 
+            # Collect CPU and memory usage data
             Write-Host "📊 Collecting CPU and memory usage data..."
 
             $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
@@ -78,6 +68,7 @@ Mode, Last Write Time, Length, Name
                 }
             }
 
+            # Write results to CPU_Memory_Usage.txt
             $results | Format-Table -AutoSize | Out-File -FilePath $usagePath -Append
             Write-Host "✅ CPU and memory usage logged to CPU_Memory_Usage.txt. Please take a screenshot and save it in Requirements1."
         }
