@@ -29,22 +29,22 @@ $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
 
 "@
 
-            # Append the .log files list
-            $newContent += (Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
+            # Append all files' details in table format
+            $newContent += (Get-ChildItem -Path "$PSScriptRoot" | 
                             Select-Object Mode, LastWriteTime, Length, Name | 
                             Format-Table -AutoSize | Out-String)
 
             # Prepend the new content and then append the existing content
             $newContent + $existingContent | Set-Content -Path $logPath
-            Format-Table -AutoSize | Out-String)
 
-            Write-Host "✅ Log files prepended to DailyLog.txt."
+            Write-Host "✅ Files prepended to DailyLog.txt."
         }
         "2" {
             # B2: List all files in tabular format and save to C916contents.txt
             $contentsPath = "$PSScriptRoot\C916contents.txt"
 
             Get-ChildItem -Path "$PSScriptRoot" | 
+                Select-Object Mode, LastWriteTime, Length, Name | 
                 Sort-Object Name | 
                 Format-Table -AutoSize | 
                 Out-File -FilePath $contentsPath
