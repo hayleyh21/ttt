@@ -10,39 +10,33 @@ while ($true) {
     
     switch ($choice) {
         "1" {
-            # B1: Append .log files to DailyLog.txt
+            # B1: Prepend .log files to DailyLog.txt (newest at the top)
             $logPath = "C:\source\requirements1\DailyLog.txt"
-
+            
             if (!(Test-Path $logPath)) {
                 Write-Host "❌ Error: $logPath does not exist. Please make sure the file is created before running this option."
                 continue
             }
+            
+            # Get current contents of DailyLog.txt and prepend new entries
+            $existingContent = Get-Content -Path $logPath
 
-            # Get last modified time before update
-            $beforeUpdate = (Get-Item $logPath).LastWriteTime
+            $newContent = @"
+--------------------------------------
+$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
+File Path: $logPath
+Mode, Last Write Time, Length, Name
+"@
 
-            "--------------------------------------" | Out-File -FilePath $logPath -Append
-            Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt" | Out-File -FilePath $logPath -Append
-            "File Path: $logPath" | Out-File -FilePath $logPath -Append
+            # Append the .log files list
+            $newContent += (Get-ChildItem -Path "C:\source\requirements1" -Filter "*.log" | 
+                            Select-Object Mode, LastWriteTime, Length, Name | 
+                            Format-Table -AutoSize | Out-String)
 
-            # Append log file data in table format (without duplicate headers)
-            Get-ChildItem -Path "C:\source\requirements1" -Filter "*.log" | 
-                Select-Object Mode, LastWriteTime, Length, Name | 
-                Format-Table -AutoSize | 
-                Out-File -FilePath $logPath -Append
+            # Write new content to the top of DailyLog.txt
+            $newContent + $existingContent | Set-Content -Path $logPath
 
-            # Get last modified time after update
-            $afterUpdate = (Get-Item $logPath).LastWriteTime
-
-            Write-Host "✅ Log files appended to DailyLog.txt."
-            Write-Host "🕒 Last modified time before update: $beforeUpdate"
-            Write-Host "🕒 Last modified time after update: $afterUpdate"
-
-            if ($beforeUpdate -ne $afterUpdate) {
-                Write-Host "✅ DailyLog.txt has been successfully updated."
-            } else {
-                Write-Host "⚠ Warning: No new content was added to DailyLog.txt."
-            }
+            Write-Host "✅ Log files prepended to DailyLog.txt."
         }
         "2" {
             # B2: List all files in tabular format and save to C916contents.txt
