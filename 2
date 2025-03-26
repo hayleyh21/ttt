@@ -36,6 +36,7 @@ Files added to DailyLog.txt:
 
             # Prepend the new content and then append the existing content
             $newContent + $existingContent | Set-Content -Path $logPath
+            Format-Table -AutoSize | Out-String)
 
             Write-Host "✅ Log files prepended to DailyLog.txt."
         }
