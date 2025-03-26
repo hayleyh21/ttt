@@ -25,9 +25,8 @@ while ($true) {
             # Prepare the new content to prepend
             $newContent = @"
 --------------------------------------
-Script run at: $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
+$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
 Files added to DailyLog.txt:
-Mode, Last Write Time, Length, Name
 "@
 
             # Append the .log files list
