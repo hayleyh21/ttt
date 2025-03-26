@@ -10,42 +10,37 @@ while ($true) {
     
     switch ($choice) {
         "1" {
-    # B1: Prepend .log files to DailyLog.txt (newest at the top)
-    $logPath = "$PSScriptRoot\DailyLog.txt"
-    
-    # Check if the DailyLog.txt exists. If it doesn't, create it.
-    if (!(Test-Path $logPath)) {
-        Write-Host "❌ $logPath does not exist. Creating new file..."
-        New-Item -Path $logPath -ItemType File
-    }
-    
-    # Get current contents of DailyLog.txt
-    $existingContent = Get-Content -Path $logPath
-    
-    # Prepare the new content for the log, just including the .log files in tabular format
-    $newContent = @"
-$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
- ---- ------------- ------ ----
-Mode LastWriteTime Length Name
+            # B1: Add .log files to DailyLog.txt (newest at the top)
+            $logPath = "$PSScriptRoot\DailyLog.txt"
+            
+            # Check if DailyLog.txt exists, if not, create it
+            if (!(Test-Path $logPath)) {
+                Write-Host "❌ $logPath does not exist. Creating new file..."
+                New-Item -Path $logPath -ItemType File
+            }
+            
+            # Get current contents of DailyLog.txt
+            $existingContent = Get-Content -Path $logPath
+            
+            # Prepare new log entry
+            $newContent = @"
+--------------------------------------
+$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
+
 "@
+            
+            # Add .log files in table format
+            $newContent += (Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
+                            Select-Object Mode, LastWriteTime, Length, Name | 
+                            Format-Table -AutoSize | Out-String)
 
-    # Get and append only .log files in the folder
-    $logFiles = Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
-                Select-Object Mode, LastWriteTime, Length, Name 
+            # Prepend new content to the beginning of the file
+            $newContent + $existingContent | Set-Content -Path $logPath
 
-    # Convert the log file information into a formatted string that retains the table structure
-    $logTable = $logFiles | Format-Table -AutoSize | Out-String
-
-    # Prepend the new content and then append the existing content
-    $newContent += $logTable
-
-    # Prepend the new content and then append the existing content to the file
-    $newContent + $existingContent | Set-Content -Path $logPath
-
-    Write-Host "✅ Log files prepended to DailyLog.txt."
-}
+            Write-Host "✅ Log files prepended to DailyLog.txt."
+        }
         "2" {
-            # B2: List all files in tabular format and save to C916contents.txt
+            # B2: List all files in the folder and save to C916contents.txt
             $contentsPath = "$PSScriptRoot\C916contents.txt"
 
             Get-ChildItem -Path "$PSScriptRoot" | 
@@ -56,8 +51,8 @@ Mode LastWriteTime Length Name
             Write-Host "✅ File listing saved to C916contents.txt."
         }
         "3" {
-            # B3: Show CPU and memory usage with 4 samples and 5-second intervals
-            Write-Host "📊 Collecting CPU and memory usage data (4 samples, 5-second interval)..."
+            # B3: Show CPU and memory usage (4 samples, 5 seconds interval)
+            Write-Host "📊 Collecting CPU and memory usage data..."
 
             $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 5 -MaxSamples 4
             $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 5 -MaxSamples 4
@@ -72,16 +67,16 @@ Mode LastWriteTime Length Name
 
             # Display results in the console
             $results | Format-Table -AutoSize
-            Write-Host "✅ CPU and memory usage displayed in the console."
-            Write-Host "Please take a screenshot and save it in Requirements1."
+            Write-Host "✅ CPU and memory usage displayed."
+            Write-Host "Take a screenshot and save it in Requirements1."
         }
         "4" {
-            # B4: List running processes sorted by virtual memory size
+            # B4: List running processes sorted by memory usage
             Get-Process | Sort-Object -Property VM | 
                 Select-Object Id, ProcessName, @{Name="VM (MB)";Expression={[math]::round($_.VM / 1MB, 2)}} | 
                 Out-GridView
 
-            Write-Host "📸 Running processes displayed in grid format. Screenshot and save in Requirements1."
+            Write-Host "📸 Running processes displayed. Screenshot and save it."
         }
         "5" {
             # B5: Exit script
