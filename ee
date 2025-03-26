@@ -60,4 +60,11 @@ while ($true) {
         }
         "5" {
             # B5: Exit script
-            Write-
+            Write-Host "Exiting script."
+            exit
+        }
+        default {
+            Write-Host "Invalid choice. Please try again."
+        }
+    }
+}
