@@ -1,0 +1,63 @@
+while ($true) {
+    Write-Host "`nSelect an option:"
+    Write-Host "1. Append .log files to DailyLog.txt (B1)"
+    Write-Host "2. List all files in tabular format (C916contents.txt) (B2)"
+    Write-Host "3. Show current CPU and memory usage (B3)"
+    Write-Host "4. List running processes sorted by virtual size (B4)"
+    Write-Host "5. Exit (B5)"
+    
+    $choice = Read-Host "Enter your choice"
+    
+    switch ($choice) {
+        "1" {
+            # B1: Append .log files to DailyLog.txt
+            $logPath = "C:\source\requirements1\DailyLog.txt"
+            "--------------------------------------" | Out-File -FilePath $logPath -Append
+            Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt" | Out-File -FilePath $logPath -Append
+            "File Path: $logPath" | Out-File -FilePath $logPath -Append
+            "Mode, Last Write Time, Length, Name" | Out-File -FilePath $logPath -Append
+
+            Get-ChildItem -Path "C:\source\requirements1" -Filter "*.log" | 
+                Select-Object Mode, LastWriteTime, Length, Name | 
+                Format-Table -AutoSize | 
+                Out-File -FilePath $logPath -Append
+
+            Write-Host "Log files appended to DailyLog.txt."
+        }
+        "2" {
+            # B2: List all files in tabular format and save to C916contents.txt
+            Get-ChildItem -Path "C:\source\requirements1" | 
+                Sort-Object Name | 
+                Format-Table -AutoSize | 
+                Out-File -FilePath "C:\source\requirements1\C916contents.txt"
+
+            Write-Host "File listing saved to C916contents.txt."
+        }
+        "3" {
+            # B3: Show CPU and memory usage
+            Read-Host "Press Enter to check system usage..."
+            $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
+            $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 2 -MaxSamples 3
+            
+            $results = for ($i = 0; $i -lt 3; $i++) {
+                [PSCustomObject]@{
+                    Timestamp    = $cpuUsage.CounterSamples[$i].Timestamp
+                    CPU_Usage    = [math]::round($cpuUsage.CounterSamples[$i].CookedValue, 2)
+                    Memory_Usage = [math]::round($memoryUsage.CounterSamples[$i].CookedValue, 2)
+                }
+            }
+
+            $results | Format-Table -AutoSize
+            Write-Host "Please take a screenshot and save it in Requirements1."
+        }
+        "4" {
+            # B4: List running processes sorted by virtual memory size
+            Get-Process | Sort-Object -Property VM | 
+                Select-Object Id, ProcessName, @{Name="VM (MB)";Expression={[math]::round($_.VM / 1MB, 2)}} | 
+                Out-GridView
+
+            Write-Host "Running processes displayed in grid format. Screenshot and save in Requirements1."
+        }
+        "5" {
+            # B5: Exit script
+            Write-
