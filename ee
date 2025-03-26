@@ -9,22 +9,21 @@ while ($true) {
     $choice = Read-Host "Enter your choice"
     
     switch ($choice) {
-        "1" {
-            # B1: Prepend .log files to DailyLog.txt (newest at the top)
-            $logPath = "$PSScriptRoot\DailyLog.txt"
-            
-            # Ensure DailyLog.txt exists before proceeding
-            if (!(Test-Path $logPath)) {
-                Write-Host "❌ DailyLog.txt does not exist. Creating it now..."
-                New-Item -Path $logPath -ItemType File -Force | Out-Null
-                Start-Sleep -Seconds 1  # Ensures file is created before continuing
-            }
-            
-            # Get current contents of DailyLog.txt
-            $existingContent = Get-Content -Path $logPath -ErrorAction SilentlyContinue
+      "1" {
+    # B1: Prepend .log files to DailyLog.txt (newest at the top)
+    $logPath = "$PSScriptRoot\DailyLog.txt"
+    
+    # Ensure the file is created if it doesn't exist
+    if (!(Test-Path $logPath)) {
+        Write-Host "❌ DailyLog.txt not found. Creating it now..."
+        New-Item -Path $logPath -ItemType File -Force | Out-Null
+    }
 
-            # Prepare new log entry
-            $newContent = @"
+    # Read existing content (avoid error if file is empty)
+    $existingContent = Get-Content -Path $logPath -Raw -ErrorAction SilentlyContinue
+
+    # Prepare new log entry
+    $newContent = @"
 $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
 Directory: $PSScriptRoot
 
@@ -32,18 +31,16 @@ Directory: $PSScriptRoot
 Mode LastWriteTime Length Name
 "@
 
-            # Get and format only .log files in the folder
-            $logFiles = Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
-                        Select-Object Mode, LastWriteTime, Length, Name 
+    # Get and format only .log files in the folder
+    $logFiles = Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
+                Select-Object Mode, LastWriteTime, Length, Name | 
+                Format-Table -AutoSize | Out-String
 
-            # Convert log file info to properly formatted table
-            $logTable = $logFiles | Format-Table -AutoSize | Out-String
+    # Combine new entry with previous content (prepend)
+    ($newContent + $logFiles + $existingContent) | Set-Content -Path $logPath -Force
 
-            # Prepend new content and then append existing content
-            ($newContent + $logTable + $existingContent) | Set-Content -Path $logPath
-
-            Write-Host "✅ Log files prepended to DailyLog.txt."
-        }
+    Write-Host "✅ Log files prepended to DailyLog.txt."
+}
         "2" {
             # B2: List all files in tabular format and save to C916contents.txt
             $contentsPath = "$PSScriptRoot\C916contents.txt"
