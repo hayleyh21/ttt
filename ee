@@ -10,36 +10,40 @@ while ($true) {
     
     switch ($choice) {
         "1" {
-            # B1: Prepend .log files to DailyLog.txt (newest at the top)
-            $logPath = "$PSScriptRoot\DailyLog.txt"
-            
-            # Check if the DailyLog.txt exists. If it doesn't, create it.
-            if (!(Test-Path $logPath)) {
-                Write-Host "❌ $logPath does not exist. Creating new file..."
-                New-Item -Path $logPath -ItemType File
-            }
-            
-            # Get current contents of DailyLog.txt
-            $existingContent = Get-Content -Path $logPath
-            
-            # Prepare the new content for the log, just including the .log files in tabular format
-            $newContent = @"
+    # B1: Prepend .log files to DailyLog.txt (newest at the top)
+    $logPath = "$PSScriptRoot\DailyLog.txt"
+    
+    # Check if the DailyLog.txt exists. If it doesn't, create it.
+    if (!(Test-Path $logPath)) {
+        Write-Host "❌ $logPath does not exist. Creating new file..."
+        New-Item -Path $logPath -ItemType File
+    }
+    
+    # Get current contents of DailyLog.txt
+    $existingContent = Get-Content -Path $logPath
+    
+    # Prepare the new content for the log, just including the .log files in tabular format
+    $newContent = @"
 $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
  ---- ------------- ------ ----
 Mode LastWriteTime Length Name
 "@
 
-            # Get and append only .log files in the folder
-            $newContent += Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
-                            Select-Object Mode, LastWriteTime, Length, Name | 
-                            Format-Table -AutoSize | 
-                            Out-String
+    # Get and append only .log files in the folder
+    $logFiles = Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
+                Select-Object Mode, LastWriteTime, Length, Name 
 
-            # Prepend the new content and then append the existing content
-            $newContent + $existingContent | Set-Content -Path $logPath
+    # Convert the log file information into a formatted string that retains the table structure
+    $logTable = $logFiles | Format-Table -AutoSize | Out-String
 
-            Write-Host "✅ Log files prepended to DailyLog.txt."
-        }
+    # Prepend the new content and then append the existing content
+    $newContent += $logTable
+
+    # Prepend the new content and then append the existing content to the file
+    $newContent + $existingContent | Set-Content -Path $logPath
+
+    Write-Host "✅ Log files prepended to DailyLog.txt."
+}
         "2" {
             # B2: List all files in tabular format and save to C916contents.txt
             $contentsPath = "$PSScriptRoot\C916contents.txt"
