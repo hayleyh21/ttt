@@ -9,17 +9,23 @@ while ($true) {
     $choice = Read-Host "Enter your choice"
     
     switch ($choice) {
-      "1" {
+    "1" {
     # B1: Prepend .log files to DailyLog.txt (newest at the top)
     $logPath = "$PSScriptRoot\DailyLog.txt"
     
-    # Ensure the file is created if it doesn't exist
+    # Ensure the file is created and has initial content immediately
     if (!(Test-Path $logPath)) {
         Write-Host "❌ DailyLog.txt not found. Creating it now..."
-        New-Item -Path $logPath -ItemType File -Force | Out-Null
+        @"
+$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
+Directory: $PSScriptRoot
+
+ ---- ------------- ------ ----
+Mode LastWriteTime Length Name
+"@ | Set-Content -Path $logPath
     }
 
-    # Read existing content (avoid error if file is empty)
+    # Read existing content (preserve previous entries)
     $existingContent = Get-Content -Path $logPath -Raw -ErrorAction SilentlyContinue
 
     # Prepare new log entry
@@ -36,11 +42,12 @@ Mode LastWriteTime Length Name
                 Select-Object Mode, LastWriteTime, Length, Name | 
                 Format-Table -AutoSize | Out-String
 
-    # Combine new entry with previous content (prepend)
+    # Prepend new entry and keep existing content
     ($newContent + $logFiles + $existingContent) | Set-Content -Path $logPath -Force
 
     Write-Host "✅ Log files prepended to DailyLog.txt."
 }
+
         "2" {
             # B2: List all files in tabular format and save to C916contents.txt
             $contentsPath = "$PSScriptRoot\C916contents.txt"
