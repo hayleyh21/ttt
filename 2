@@ -13,9 +13,10 @@ while ($true) {
             # B1: Prepend .log files to DailyLog.txt (newest at the top)
             $logPath = "C:\source\requirements1\DailyLog.txt"
             
+            # Check if the DailyLog.txt exists. If it doesn't, create it.
             if (!(Test-Path $logPath)) {
-                Write-Host "❌ Error: $logPath does not exist. Please make sure the file is created before running this option."
-                continue
+                Write-Host "❌ $logPath does not exist. Creating new file..."
+                New-Item -Path $logPath -ItemType File
             }
             
             # Get current contents of DailyLog.txt and prepend new entries
@@ -55,7 +56,15 @@ Mode, Last Write Time, Length, Name
             Write-Host "✅ File listing saved to C916contents.txt."
         }
         "3" {
-            # B3: Show CPU and memory usage
+            # B3: Show CPU and memory usage and log to file (only create file if needed)
+            $usagePath = "C:\source\requirements1\CPU_Memory_Usage.txt"
+            
+            # Check if the CPU_Memory_Usage.txt exists. If not, create it.
+            if (!(Test-Path $usagePath)) {
+                Write-Host "❌ $usagePath does not exist. Creating new file..."
+                New-Item -Path $usagePath -ItemType File
+            }
+
             Read-Host "Press Enter to check system usage..."
             $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
             $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 2 -MaxSamples 3
@@ -68,8 +77,8 @@ Mode, Last Write Time, Length, Name
                 }
             }
 
-            $results | Format-Table -AutoSize
-            Write-Host "📸 Please take a screenshot and save it in Requirements1."
+            $results | Format-Table -AutoSize | Out-File -FilePath $usagePath -Append
+            Write-Host "✅ CPU and memory usage logged to CPU_Memory_Usage.txt. Please take a screenshot and save it in Requirements1."
         }
         "4" {
             # B4: List running processes sorted by virtual memory size
