@@ -24,9 +24,10 @@ while ($true) {
             
             # Prepare the new content to prepend
             $newContent = @"
---------------------------------------
-$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
-
+$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
+Directory: $PSScriptRoot
+ ---- ------------- ------ ----
+Mode LastWriteTime Length Name
 "@
 
             # Append all files' details in table format
@@ -44,48 +45,4 @@ $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
             $contentsPath = "$PSScriptRoot\C916contents.txt"
 
             Get-ChildItem -Path "$PSScriptRoot" | 
-                Select-Object Mode, LastWriteTime, Length, Name | 
-                Sort-Object Name | 
-                Format-Table -AutoSize | 
-                Out-File -FilePath $contentsPath
-
-            Write-Host "✅ File listing saved to C916contents.txt."
-        }
-        "3" {
-            # B3: Show CPU and memory usage without saving to file
-            Write-Host "📊 Collecting CPU and memory usage data..."
-
-            $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
-            $memoryUsage = Get-Counter -Counter "\Memory\% Committed Bytes In Use" -SampleInterval 2 -MaxSamples 3
-            
-            $results = for ($i = 0; $i -lt 3; $i++) {
-                [PSCustomObject]@{
-                    Timestamp    = $cpuUsage.CounterSamples[$i].Timestamp
-                    CPU_Usage    = [math]::round($cpuUsage.CounterSamples[$i].CookedValue, 2)
-                    Memory_Usage = [math]::round($memoryUsage.CounterSamples[$i].CookedValue, 2)
-                }
-            }
-
-            # Display results in the console (without saving to file)
-            $results | Format-Table -AutoSize
-            Write-Host "✅ CPU and memory usage displayed in the console."
-            Write-Host "Please take a screenshot and save it in Requirements1."
-        }
-        "4" {
-            # B4: List running processes sorted by virtual memory size
-            Get-Process | Sort-Object -Property VM | 
-                Select-Object Id, ProcessName, @{Name="VM (MB)";Expression={[math]::round($_.VM / 1MB, 2)}} | 
-                Out-GridView
-
-            Write-Host "📸 Running processes displayed in grid format. Screenshot and save in Requirements1."
-        }
-        "5" {
-            # B5: Exit script
-            Write-Host "👋 Exiting script."
-            exit
-        }
-        default {
-            Write-Host "⚠ Invalid choice. Please try again."
-        }
-    }
-}
+                Select-
