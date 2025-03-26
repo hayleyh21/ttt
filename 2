@@ -19,13 +19,14 @@ while ($true) {
                 New-Item -Path $logPath -ItemType File
             }
             
-            # Get current contents of DailyLog.txt and prepend new entries
+            # Get current contents of DailyLog.txt
             $existingContent = Get-Content -Path $logPath
-
+            
+            # Prepare the new content to prepend
             $newContent = @"
 --------------------------------------
-$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
-File Path: $logPath
+Script run at: $(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm tt")
+Files added to DailyLog.txt:
 Mode, Last Write Time, Length, Name
 "@
 
@@ -34,7 +35,7 @@ Mode, Last Write Time, Length, Name
                             Select-Object Mode, LastWriteTime, Length, Name | 
                             Format-Table -AutoSize | Out-String)
 
-            # Write new content to the top of DailyLog.txt
+            # Prepend the new content and then append the existing content
             $newContent + $existingContent | Set-Content -Path $logPath
 
             Write-Host "✅ Log files prepended to DailyLog.txt."
@@ -51,10 +52,7 @@ Mode, Last Write Time, Length, Name
             Write-Host "✅ File listing saved to C916contents.txt."
         }
         "3" {
-            # B3: Show CPU and memory usage and log to file
-            $usagePath = "$PSScriptRoot\CPU_Memory_Usage.txt"
-
-            # Collect CPU and memory usage data
+            # B3: Show CPU and memory usage without saving to file
             Write-Host "📊 Collecting CPU and memory usage data..."
 
             $cpuUsage = Get-Counter -Counter "\Processor(_Total)\% Processor Time" -SampleInterval 2 -MaxSamples 3
@@ -68,9 +66,10 @@ Mode, Last Write Time, Length, Name
                 }
             }
 
-            # Write results to CPU_Memory_Usage.txt
-            $results | Format-Table -AutoSize | Out-File -FilePath $usagePath -Append
-            Write-Host "✅ CPU and memory usage logged to CPU_Memory_Usage.txt. Please take a screenshot and save it in Requirements1."
+            # Display results in the console (without saving to file)
+            $results | Format-Table -AutoSize
+            Write-Host "✅ CPU and memory usage displayed in the console."
+            Write-Host "Please take a screenshot and save it in Requirements1."
         }
         "4" {
             # B4: List running processes sorted by virtual memory size
