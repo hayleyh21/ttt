@@ -30,9 +30,10 @@ Mode LastWriteTime Length Name
 "@
 
             # Get and append only .log files in the folder
-            $newContent += (Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
+            $newContent += Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
                             Select-Object Mode, LastWriteTime, Length, Name | 
-                            Format-Table -AutoSize | Out-String)
+                            Format-Table -AutoSize | 
+                            Out-String
 
             # Prepend the new content and then append the existing content
             $newContent + $existingContent | Set-Content -Path $logPath
