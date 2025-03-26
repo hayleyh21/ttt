@@ -9,43 +9,35 @@ while ($true) {
     $choice = Read-Host "Enter your choice"
     
     switch ($choice) {
-    "1" {
-    # B1: Prepend .log files to DailyLog.txt (newest at the top)
+   "1" {
+    # B1: Append .log files to DailyLog.txt with timestamp
     $logPath = "$PSScriptRoot\DailyLog.txt"
     
-    # Ensure the file is created and has initial content immediately
+    # Ensure the file is created if it doesn't exist
     if (!(Test-Path $logPath)) {
         Write-Host "❌ DailyLog.txt not found. Creating it now..."
-        @"
-$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
-Directory: $PSScriptRoot
-
- ---- ------------- ------ ----
-Mode LastWriteTime Length Name
-"@ | Set-Content -Path $logPath
+        New-Item -Path $logPath -ItemType File -Force | Out-Null
     }
 
-    # Read existing content (preserve previous entries)
-    $existingContent = Get-Content -Path $logPath -Raw -ErrorAction SilentlyContinue
-
-    # Prepare new log entry
-    $newContent = @"
-$(Get-Date -Format "dddd, MMMM dd, yyyy hh:mm:ss tt")
+    # Prepare the timestamp header
+    $timestamp = "$(Get-Date -Format 'dddd, MMMM dd, yyyy hh:mm:ss tt')"
+    $header = @"
+$timestamp
 Directory: $PSScriptRoot
 
  ---- ------------- ------ ----
 Mode LastWriteTime Length Name
 "@
 
-    # Get and format only .log files in the folder
+    # Get .log files in table format
     $logFiles = Get-ChildItem -Path "$PSScriptRoot" -Filter "*.log" | 
                 Select-Object Mode, LastWriteTime, Length, Name | 
                 Format-Table -AutoSize | Out-String
 
-    # Prepend new entry and keep existing content
-    ($newContent + $logFiles + $existingContent) | Set-Content -Path $logPath -Force
+    # Append new entry to DailyLog.txt
+    ($header + $logFiles) | Add-Content -Path $logPath
 
-    Write-Host "✅ Log files prepended to DailyLog.txt."
+    Write-Host "✅ Log files appended to DailyLog.txt."
 }
 
         "2" {
